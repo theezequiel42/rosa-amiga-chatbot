@@ -2,11 +2,14 @@ import { GoogleGenAI, Chat } from "@google/genai";
 import { SYSTEM_INSTRUCTION } from '../constants';
 import { retrieveContext } from './ragService';
 
-if (!process.env.API_KEY) {
-  throw new Error("API_KEY environment variable not set");
+// In Vite, client-side env vars must be prefixed with VITE_
+const API_KEY = import.meta.env.VITE_GEMINI_API_KEY as string | undefined;
+
+if (!API_KEY) {
+  throw new Error("VITE_GEMINI_API_KEY environment variable not set");
 }
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const ai = new GoogleGenAI({ apiKey: API_KEY });
 
 export const createChatSession = (): Chat => {
   const chat = ai.chats.create({
