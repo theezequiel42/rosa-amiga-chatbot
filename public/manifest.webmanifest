@@ -1,0 +1,13 @@
+{
+  "name": "Rosa Amiga",
+  "short_name": "RosaAmiga",
+  "description": "Apoio e conscientização contra a violência doméstica",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#db2777",
+  "lang": "pt-BR",
+  "dir": "ltr"
+}
+
