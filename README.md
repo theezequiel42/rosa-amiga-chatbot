@@ -136,3 +136,22 @@ Licenciado sob a licença MIT.
 
 Desenvolvido com carinho para ajudar quem precisa 💜
 
+## Deploy
+
+### Vercel
+
+1) Crie um novo projeto e selecione este repositório.
+2) Framework: Vite • Build: `npm run build` • Output: `dist`.
+3) Variáveis de ambiente (Project Settings → Environment Variables):
+   - `GEMINI_API_KEY` = sua chave.
+4) Deploy. A Vercel servirá o conteúdo estático de `dist/`.
+
+Obs.: a chave será embutida no bundle do frontend (client‑side). Se precisar ocultá‑la, use um backend/proxy para chamadas ao Gemini.
+
+### Netlify
+
+1) New site → Import from Git.
+2) Build command: `npm run build` • Publish directory: `dist`.
+3) Site settings → Environment variables:
+   - `GEMINI_API_KEY` = sua chave.
+4) Deploy. O arquivo `public/_headers` será copiado para `dist/` automaticamente.
