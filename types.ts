@@ -9,6 +9,7 @@ export interface ChatMessage {
   text: string;
   sender: Sender;
   imageUrl?: string;
+  alt?: string;
   icon?: { name: string };
 }
 
