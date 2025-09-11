@@ -56,9 +56,9 @@ A Rosa Amiga é uma aplicação web que usa IA (Google Gemini) e RAG (Retrieval�
 3) Configure as variáveis de ambiente
    Crie um arquivo `.env.local` na raiz do projeto (não versionado) com:
    ```
-   GEMINI_API_KEY=suachaveaqui
+   VITE_GEMINI_API_KEY=suachaveaqui
    ```
-   Observação: o build injeta `process.env.API_KEY` a partir de `GEMINI_API_KEY` (ver `vite.config.ts`).
+   Observação: a aplicação lê `import.meta.env.VITE_GEMINI_API_KEY` diretamente no frontend.
 
 4) Rode em desenvolvimento
    ```bash
@@ -143,7 +143,7 @@ Desenvolvido com carinho para ajudar quem precisa 💜
 1) Crie um novo projeto e selecione este repositório.
 2) Framework: Vite • Build: `npm run build` • Output: `dist`.
 3) Variáveis de ambiente (Project Settings → Environment Variables):
-   - `GEMINI_API_KEY` = sua chave.
+   - `VITE_GEMINI_API_KEY` = sua chave.
 4) Deploy. A Vercel servirá o conteúdo estático de `dist/`.
 
 Obs.: a chave será embutida no bundle do frontend (client‑side). Se precisar ocultá‑la, use um backend/proxy para chamadas ao Gemini.
@@ -153,5 +153,5 @@ Obs.: a chave será embutida no bundle do frontend (client‑side). Se precisar 
 1) New site → Import from Git.
 2) Build command: `npm run build` • Publish directory: `dist`.
 3) Site settings → Environment variables:
-   - `GEMINI_API_KEY` = sua chave.
+   - `VITE_GEMINI_API_KEY` = sua chave.
 4) Deploy. O arquivo `public/_headers` será copiado para `dist/` automaticamente.
