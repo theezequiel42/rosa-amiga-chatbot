@@ -2,32 +2,70 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Ajuda — Rosa Amiga</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+    <link rel="stylesheet" href="/static-pages.css" />
   </head>
   <body>
-    <header>
-      <h1>Ajuda</h1>
-      <p>Como usar a Rosa Amiga com segurança.</p>
-    </header>
-    <main>
-      <section>
-        <h2>Dicas de segurança</h2>
-        <ul>
-          <li>Se estiver em perigo imediato, ligue para <strong>190</strong>.</li>
-          <li>Use o botão <em>Saída Rápida</em> para fechar o site rapidamente.</li>
-          <li>Apague o histórico do navegador se necessário.</li>
-        </ul>
-      </section>
-      <section>
-        <h2>Contatos úteis</h2>
-        <ul>
-          <li>Central de Atendimento à Mulher: <strong>180</strong></li>
-        </ul>
-      </section>
-      <p><a href="/">Voltar</a></p>
-    </main>
-  </body>
-  </html>
+    <div class="page">
+      <header class="page-header">
+        <h1>Ajuda</h1>
+        <p>Guia rápido para usar a Rosa Amiga com segurança e encontrar apoio quando precisar.</p>
+        <nav class="page-nav" aria-label="Navegação secundária">
+          <a href="/privacy.html">Privacidade</a>
+          <a href="/terms.html">Termos</a>
+          <a href="/">Voltar ao chat</a>
+        </nav>
+      </header>
+      <main class="page-content">
+        <section class="section-card">
+          <h2>Dicas de segurança imediata</h2>
+          <div class="callout">
+            <strong>Emergência? Ligue 190.</strong>
+            <span>Mantenha o telefone por perto e, se possível, avise alguém de confiança sobre a situação.</span>
+          </div>
+          <ul>
+            <li>Use o botão <em>Saída Rápida</em> no topo da página para ocultar o site rapidamente.</li>
+            <li>Apague o histórico do navegador ou utilize o modo de navegação privada quando terminar.</li>
+            <li>Acesse a Rosa Amiga de um dispositivo seguro sempre que puder.</li>
+          </ul>
+        </section>
 
+        <section class="section-card">
+          <h2>Como aproveitar o chat</h2>
+          <ul>
+            <li>Converse em termos gerais se não se sentir segura para compartilhar detalhes específicos.</li>
+            <li>Peça por planos de segurança, informações sobre direitos ou recursos na sua região.</li>
+            <li>Lembre-se: você pode parar a qualquer momento. A Rosa Amiga está aqui para apoiar você.</li>
+          </ul>
+        </section>
+
+        <section class="section-card">
+          <h2>Contatos e serviços úteis</h2>
+          <div class="resource-list">
+            <article class="resource-item">
+              <h3>Central de Atendimento à Mulher — 180</h3>
+              <p>Atendimento 24h, gratuito e confidencial para orientações e encaminhamentos.</p>
+            </article>
+            <article class="resource-item">
+              <h3>SAMU — 192</h3>
+              <p>Serviço de emergência médica para situações que demandam atendimento imediato.</p>
+            </article>
+            <article class="resource-item">
+              <h3>Delegacia da Mulher</h3>
+              <p>Verifique o endereço da unidade mais próxima para registrar ocorrências e pedir medidas protetivas.</p>
+            </article>
+          </div>
+        </section>
+
+        <a class="back-link" href="/">
+          <span aria-hidden="true">←</span>
+          <span>Voltar para Rosa Amiga</span>
+        </a>
+      </main>
+      <footer class="page-footer">
+        Este é um espaço seguro. Se estiver em perigo imediato, <strong>ligue 190</strong> ou procure ajuda presencial.
+      </footer>
+    </div>
+  </body>
+</html>

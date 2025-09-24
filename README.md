@@ -11,7 +11,7 @@ A Rosa Amiga é uma aplicação web que usa IA (Google Gemini) e RAG (Retrieval�
 ## Funcionalidades
 
 - Interface de chat intuitiva e responsiva
-- Modo de voz em tempo real (Web Speech API)
+- Modo de voz em tempo real para Acessibilidade (Web Speech API)
 - Visualização de áudio 3D interativa (Three.js + Web Audio API)
 - IA conversacional com Google Gemini
 - Busca híbrida (semântica + palavra‑chave) com RRF

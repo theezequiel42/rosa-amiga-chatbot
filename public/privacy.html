@@ -2,22 +2,62 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Privacidade — Rosa Amiga</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+    <link rel="stylesheet" href="/static-pages.css" />
   </head>
   <body>
-    <header>
-      <h1>Política de Privacidade</h1>
-    </header>
-    <main>
-      <p>Esta aplicação roda majoritariamente no seu navegador. As mensagens podem ser encaminhadas ao provedor de IA (Google Gemini) apenas para gerar respostas. Não coletamos dados pessoais além do necessário para o funcionamento do chat.</p>
-      <ul>
-        <li>Não utilizamos cookies de rastreamento.</li>
-        <li>Você pode apagar a conversa recarregando a página.</li>
-      </ul>
-      <p><a href="/">Voltar</a></p>
-    </main>
-  </body>
-  </html>
+    <div class="page">
+      <header class="page-header">
+        <h1>Política de Privacidade</h1>
+        <p>Transparência sobre como tratamos dados e protegemos sua experiência na Rosa Amiga.</p>
+        <nav class="page-nav" aria-label="Navegação secundária">
+          <a href="/help.html">Ajuda</a>
+          <a href="/terms.html">Termos</a>
+          <a href="/">Voltar ao chat</a>
+        </nav>
+      </header>
+      <main class="page-content">
+        <section class="section-card">
+          <h2>Funcionamento do serviço</h2>
+          <ul>
+            <li>A maior parte do processamento acontece diretamente no seu navegador.</li>
+            <li>As mensagens são encaminhadas ao provedor de IA (Google Gemini) apenas para gerar respostas.</li>
+            <li>Não utilizamos cookies de rastreamento ou ferramentas de análise de terceiros.</li>
+          </ul>
+        </section>
 
+        <section class="section-card">
+          <h2>Dicas para preservar sua privacidade</h2>
+          <div class="resource-list">
+            <article class="resource-item">
+              <h3>Apague sinais de uso</h3>
+              <p>Limpe o histórico, cache e abas recentes do navegador ao encerrar a conversa.</p>
+            </article>
+            <article class="resource-item">
+              <h3>Navegação segura</h3>
+              <p>Quando possível, use janelas anônimas ou um dispositivo confiável para acessar o chat.</p>
+            </article>
+            <article class="resource-item">
+              <h3>Guarde informações confidenciais</h3>
+              <p>Evite compartilhar dados pessoais sensíveis e não salve prints da conversa em locais inseguros.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="section-card">
+          <h2>Seus direitos</h2>
+          <p>Você pode encerrar a sessão a qualquer momento. Caso tenha dúvidas sobre como seus dados são tratados, entre em contato conosco pelo e-mail informado nos canais da Rosa Amiga.</p>
+        </section>
+
+        <a class="back-link" href="/">
+          <span aria-hidden="true">←</span>
+          <span>Voltar para Rosa Amiga</span>
+        </a>
+      </main>
+      <footer class="page-footer">
+        Sua segurança vem primeiro. Em caso de ameaça, priorize sair do ambiente virtual e procure ajuda local.
+      </footer>
+    </div>
+  </body>
+</html>
