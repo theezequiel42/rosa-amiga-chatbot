@@ -182,7 +182,7 @@ export const useVoiceProcessor = () => {
   const processAudio = useCallback(() => {
     if (analyserRef.current && dataArrayRef.current) {
       analyserRef.current.getByteFrequencyData(dataArrayRef.current);
-      setFrequencyData(new Uint8Array(dataArrayRef.current));
+      setFrequencyData(Uint8Array.from(dataArrayRef.current));
       animationFrameRef.current = requestAnimationFrame(processAudio);
     }
   }, []);
