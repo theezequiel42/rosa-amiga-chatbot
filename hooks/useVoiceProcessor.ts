@@ -109,7 +109,7 @@ export const useVoiceProcessor = () => {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [finalTranscript, setFinalTranscript] = useState('');
-  const [frequencyData, setFrequencyData] = useState(new Uint8Array(0));
+  const [frequencyData, setFrequencyData] = useState<Uint8Array<ArrayBufferLike>>(new Uint8Array(0));
   const [preferredVoice, setPreferredVoice] = useState<SpeechSynthesisVoice | null>(null);
   const initialSpeechRecognitionSupport = Boolean(SpeechRecognitionAPI);
   const [isSpeechRecognitionAvailable, setIsSpeechRecognitionAvailable] = useState(initialSpeechRecognitionSupport);
@@ -192,7 +192,7 @@ export const useVoiceProcessor = () => {
   const processAudio = useCallback(() => {
     if (analyserRef.current && dataArrayRef.current) {
       analyserRef.current.getByteFrequencyData(dataArrayRef.current);
-      const frameCopy = new Uint8Array(dataArrayRef.current.length);
+      const frameCopy: Uint8Array<ArrayBufferLike> = new Uint8Array(dataArrayRef.current.length);
       frameCopy.set(dataArrayRef.current);
       setFrequencyData(frameCopy);
       animationFrameRef.current = requestAnimationFrame(processAudio);

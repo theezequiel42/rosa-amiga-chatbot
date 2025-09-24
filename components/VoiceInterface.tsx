@@ -13,6 +13,8 @@ export type VoiceState = 'idle' | 'listening' | 'thinking' | 'speaking' | 'error
 
 const sanitizeResponseChunk = (raw: string) =>
   raw
+    .replace(/\[\[(?:img|icon):[^\]]+\]\]/gi, '')
+    .replace(/[•●◦▪◆■□▪✦☆★☀️⭐✨🌟⚠️✅☑️⬇️⬆️➡️⏱️✓✗✘✔✖︎☛☞☚☜➤➔➜➝➞➟➠➡︎➥➦➧➨➩➪➭➮➯➱➲➳➵➸]/g, '')
     .replace(/\|\|\|/g, ' ')
     .replace(/\*\*/g, '')
     .replace(/\s+/g, ' ')
