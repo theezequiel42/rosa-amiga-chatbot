@@ -49,7 +49,9 @@ declare global {
 // --- END: Web Speech API Type Declarations ---
 
 // Handle browser prefixes for SpeechRecognition
-const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+const SpeechRecognitionAPI = typeof window !== 'undefined'
+  ? window.SpeechRecognition || window.webkitSpeechRecognition
+  : undefined;
 
 type SpeechStreamHandle = {
   enqueue: (text: string) => void;
@@ -109,6 +111,13 @@ export const useVoiceProcessor = () => {
   const [finalTranscript, setFinalTranscript] = useState('');
   const [frequencyData, setFrequencyData] = useState(new Uint8Array(0));
   const [preferredVoice, setPreferredVoice] = useState<SpeechSynthesisVoice | null>(null);
+  const initialSpeechRecognitionSupport = Boolean(SpeechRecognitionAPI);
+  const [isSpeechRecognitionAvailable, setIsSpeechRecognitionAvailable] = useState(initialSpeechRecognitionSupport);
+  const [voiceSupportWarning, setVoiceSupportWarning] = useState(() =>
+    initialSpeechRecognitionSupport
+      ? ''
+      : 'O modo por voz funciona apenas nos navegadores Chrome, Edge ou Safari recentes com suporte à API Web Speech.'
+  );
   
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
@@ -119,6 +128,7 @@ export const useVoiceProcessor = () => {
   const animationFrameRef = useRef<number | null>(null);
 
   const speechStreamRef = useRef<SpeechStreamController | null>(null);
+  const silenceStartRef = useRef<number | null>(null);
 
   useEffect(() => {
     const getAndSetVoice = () => {
@@ -182,7 +192,9 @@ export const useVoiceProcessor = () => {
   const processAudio = useCallback(() => {
     if (analyserRef.current && dataArrayRef.current) {
       analyserRef.current.getByteFrequencyData(dataArrayRef.current);
-      setFrequencyData(Uint8Array.from(dataArrayRef.current));
+      const frameCopy = new Uint8Array(dataArrayRef.current.length);
+      frameCopy.set(dataArrayRef.current);
+      setFrequencyData(frameCopy);
       animationFrameRef.current = requestAnimationFrame(processAudio);
     }
   }, []);
@@ -192,9 +204,13 @@ export const useVoiceProcessor = () => {
 
     setTranscript('');
     setFinalTranscript('');
+    silenceStartRef.current = null;
 
     if (!SpeechRecognitionAPI) {
-      throw createVoiceError('speech-recognition-unsupported', 'Speech recognition is not supported in this browser.');
+      const warningMessage = 'O modo por voz não é compatível com este navegador. Experimente Chrome, Edge ou Safari atualizados.';
+      setIsSpeechRecognitionAvailable(false);
+      setVoiceSupportWarning(warningMessage);
+      throw createVoiceError('speech-recognition-unsupported', warningMessage);
     }
 
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -255,6 +271,8 @@ export const useVoiceProcessor = () => {
       recognition.start();
       recognitionRef.current = recognition;
       setIsListening(true);
+      setIsSpeechRecognitionAvailable(true);
+      setVoiceSupportWarning('');
     } catch (err) {
       console.error('Error accessing microphone:', err);
       setIsListening(false);
@@ -279,8 +297,38 @@ export const useVoiceProcessor = () => {
       recognitionRef.current = null;
     }
     setIsListening(false);
+    silenceStartRef.current = null;
     cleanup();
   }, [cleanup]);
+
+  useEffect(() => {
+    if (!isListening) {
+      silenceStartRef.current = null;
+      return;
+    }
+
+    if (!frequencyData.length) {
+      return;
+    }
+
+    const averageAmplitude = frequencyData.reduce((sum, value) => sum + value, 0) / frequencyData.length;
+    const SILENCE_THRESHOLD = 18; // values below roughly correspond to ambient noise
+    const SILENCE_DURATION_MS = 2500;
+
+    if (averageAmplitude > SILENCE_THRESHOLD) {
+      silenceStartRef.current = null;
+      return;
+    }
+
+    if (silenceStartRef.current === null) {
+      silenceStartRef.current = performance.now();
+      return;
+    }
+
+    if (performance.now() - silenceStartRef.current >= SILENCE_DURATION_MS) {
+      stopListening();
+    }
+  }, [frequencyData, isListening, stopListening]);
 
   useEffect(() => {
     return () => {
@@ -398,5 +446,16 @@ export const useVoiceProcessor = () => {
     stream.end();
   }, [createSpeechStream]);
 
-  return { isListening, transcript, frequencyData, startListening, stopListening, speak, setTranscript, createSpeechStream };
+  return {
+    isListening,
+    transcript,
+    frequencyData,
+    startListening,
+    stopListening,
+    speak,
+    setTranscript,
+    createSpeechStream,
+    speechRecognitionAvailable: isSpeechRecognitionAvailable,
+    speechRecognitionWarning: voiceSupportWarning,
+  };
 };

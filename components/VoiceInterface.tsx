@@ -54,7 +54,17 @@ const resolveStreamingErrorMessage = (error: unknown) => {
 const VoiceInterface: React.FC<VoiceInterfaceProps> = ({ onExit, chat }) => {
   const [voiceState, setVoiceState] = useState<VoiceState>('idle');
   const [errorMessage, setErrorMessage] = useState('');
-  const { isListening, transcript, frequencyData, startListening, stopListening, setTranscript, createSpeechStream } = useVoiceProcessor();
+  const {
+    isListening,
+    transcript,
+    frequencyData,
+    startListening,
+    stopListening,
+    setTranscript,
+    createSpeechStream,
+    speechRecognitionAvailable,
+    speechRecognitionWarning,
+  } = useVoiceProcessor();
   const activeSpeechStreamRef = useRef<ReturnType<typeof createSpeechStream> | null>(null);
 
   const handleSendMessage = useCallback(async (messageText: string) => {
@@ -124,6 +134,13 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({ onExit, chat }) => {
   }, [isListening, voiceState, transcript, stopListening, handleSendMessage]);
 
   const handleVisualizerClick = async () => {
+    if (!speechRecognitionAvailable) {
+      const message = speechRecognitionWarning || 'O modo de voz não é compatível com este navegador. Volte para o bate-papo de texto.';
+      setErrorMessage(message);
+      setVoiceState('error');
+      return;
+    }
+
     if (voiceState === 'idle' || voiceState === 'error') {
       activeSpeechStreamRef.current?.cancel();
       activeSpeechStreamRef.current = null;
@@ -147,7 +164,18 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({ onExit, chat }) => {
     activeSpeechStreamRef.current = null;
   }, []);
 
+  useEffect(() => {
+    if (!speechRecognitionAvailable) {
+      const message = speechRecognitionWarning || 'O modo de voz não é compatível com este navegador. Volte para o bate-papo de texto.';
+      setVoiceState('error');
+      setErrorMessage(message);
+    }
+  }, [speechRecognitionAvailable, speechRecognitionWarning]);
+
   const statusText = useMemo(() => {
+    if (!speechRecognitionAvailable) {
+      return 'O modo de voz não é compatível com este navegador.';
+    }
     switch (voiceState) {
       case 'listening':
         return 'Ouvindo... toque para parar.';
@@ -161,7 +189,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({ onExit, chat }) => {
       default:
         return 'Toque na esfera para começar a falar.';
     }
-  }, [voiceState]);
+  }, [voiceState, speechRecognitionAvailable]);
 
   const secondaryText = voiceState === 'error' ? (errorMessage || 'Volte para o bate-papo de texto ou toque para tentar novamente.') : transcript;
 
@@ -177,7 +205,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({ onExit, chat }) => {
         </svg>
       </button>
 
-      <div className="w-full h-3/5 max-w-3xl">
+      <div className={`w-full h-3/5 max-w-3xl ${speechRecognitionAvailable ? '' : 'pointer-events-none opacity-60'}`}>
         <AudioVisualizer
           frequencyData={frequencyData}
           interactionState={voiceState}
