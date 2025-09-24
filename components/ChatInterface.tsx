@@ -279,19 +279,19 @@ const ChatInterface: React.FC = () => {
               type="button"
               onClick={() => setMode('voice')}
               disabled={isLoading}
-              className="text-gray-500 font-semibold w-12 h-12 rounded-full hover:bg-gray-100 disabled:text-gray-300 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 flex items-center justify-center flex-shrink-0"
+              className="text-gray-500 font-semibold w-12 h-12 max-[408px]:w-10 max-[408px]:h-10 rounded-full hover:bg-gray-100 disabled:text-gray-300 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 flex items-center justify-center flex-shrink-0"
               aria-label="Ativar bate-papo por voz"
             >
-              <GiSoundWaves className="h-6 w-6" aria-hidden="true" focusable="false" />
+              <GiSoundWaves className="h-6 w-6 max-[408px]:h-5 max-[408px]:w-5" aria-hidden="true" focusable="false" />
             </button>
           )}
           <button
             type="submit"
             disabled={isLoading || !input.trim() || showQuickReplies}
-            className="bg-pink-600 text-white font-semibold w-12 h-12 rounded-full hover:bg-pink-700 disabled:bg-pink-300 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 flex items-center justify-center flex-shrink-0"
+            className="bg-pink-600 text-white font-semibold w-12 h-12 max-[408px]:w-10 max-[408px]:h-10 rounded-full hover:bg-pink-700 disabled:bg-pink-300 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 flex items-center justify-center flex-shrink-0"
             aria-label="Enviar mensagem"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" focusable="false">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 max-[408px]:h-5 max-[408px]:w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" focusable="false">
               <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
             </svg>
           </button>
