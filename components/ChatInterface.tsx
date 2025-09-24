@@ -6,6 +6,7 @@ import { initializeRag } from '../services/ragService';
 import MessageBubble from './MessageBubble';
 import VoiceInterface from './VoiceInterface';
 import { RiFlowerFill } from 'react-icons/ri';
+import { GiSoundWaves } from 'react-icons/gi';
 
 const QUICK_REPLIES = [
   'O que é violência doméstica?',
@@ -281,10 +282,7 @@ const ChatInterface: React.FC = () => {
               className="text-gray-500 font-semibold w-12 h-12 rounded-full hover:bg-gray-100 disabled:text-gray-300 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 flex items-center justify-center flex-shrink-0"
               aria-label="Ativar bate-papo por voz"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" focusable="false">
-                <path fillRule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm-1 4a1 1 0 00-1 1v2a1 1 0 102 0v-2a1 1 0 00-1-1zm10-1a1 1 0 100 2v-2a1 1 0 100-2zM9 4a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z" clipRule="evenodd" />
-                <path d="M3 10a5 5 0 015-5h4a5 5 0 015 5v2a5 5 0 01-5 5H8a5 5 0 01-5-5v-2zM8 9a3 3 0 00-3 3v2a3 3 0 003 3h4a3 3 0 003-3v-2a3 3 0 00-3-3H8z" />
-              </svg>
+              <GiSoundWaves className="h-6 w-6" aria-hidden="true" focusable="false" />
             </button>
           )}
           <button
