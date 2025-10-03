@@ -121,6 +121,26 @@ const fragmentShader = `
   }
 `;
 
+
+const detectFallbackPreference = () => {
+  if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+    return false;
+  }
+
+  const hardwareCores = typeof navigator.hardwareConcurrency === 'number' ? navigator.hardwareConcurrency : undefined;
+  const lowCpu = typeof hardwareCores === 'number' && hardwareCores <= 6;
+
+  const navWithMemory = navigator as Navigator & { deviceMemory?: number };
+  const deviceMemory = navWithMemory.deviceMemory;
+  const lowMemory = typeof deviceMemory === 'number' && deviceMemory <= 4;
+
+  const hasCoarsePointer = typeof window.matchMedia === 'function' && window.matchMedia('(any-pointer: coarse)').matches;
+  const prefersReducedMotion = typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const smallViewport = window.innerWidth <= 900;
+
+  return lowCpu || lowMemory || hasCoarsePointer || prefersReducedMotion || smallViewport;
+};
+
 const resolveStateFloat = (state: VoiceState) => {
   switch (state) {
     case 'listening':
@@ -150,19 +170,14 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({ frequencyData, intera
   const isInitializedRef = useRef(false);
   const latestPropsRef = useRef({ frequencyData, interactionState });
 
-  const [useFallback, setUseFallback] = useState(() => {
-    if (typeof navigator === 'undefined' || typeof navigator.hardwareConcurrency !== 'number') {
-      return false;
-    }
-    return navigator.hardwareConcurrency <= 4;
-  });
+  const [useFallback, setUseFallback] = useState(() => detectFallbackPreference());
 
   useEffect(() => {
     latestPropsRef.current = { frequencyData, interactionState };
   }, [frequencyData, interactionState]);
 
   useEffect(() => {
-    if (!useFallback && typeof navigator !== 'undefined' && typeof navigator.hardwareConcurrency === 'number' && navigator.hardwareConcurrency <= 4) {
+    if (!useFallback && detectFallbackPreference()) {
       setUseFallback(true);
     }
   }, [useFallback]);
@@ -228,6 +243,13 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({ frequencyData, intera
         currentMount.appendChild(renderer.domElement);
         rendererRef.current = renderer;
 
+        const handleContextLost = (event: Event) => {
+          event.preventDefault();
+          disposeScene();
+          setUseFallback(true);
+        };
+        renderer.domElement.addEventListener('webglcontextlost', handleContextLost, { once: true });
+
         const gl = renderer.getContext();
         const hasWebGLContext = (typeof WebGL2RenderingContext !== 'undefined' && gl instanceof WebGL2RenderingContext) ||
           (typeof WebGLRenderingContext !== 'undefined' && gl instanceof WebGLRenderingContext);
@@ -235,7 +257,7 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({ frequencyData, intera
           throw new Error('WebGL not supported on this device');
         }
 
-        const detailLevel = typeof window !== 'undefined' && window.innerWidth < 768 ? 4 : 5;
+        const detailLevel = typeof window !== 'undefined' && window.innerWidth < 1024 ? 3 : 5;
         const geometry = new THREE.IcosahedronGeometry(1.5, detailLevel);
         const material = new THREE.ShaderMaterial({
           vertexShader,

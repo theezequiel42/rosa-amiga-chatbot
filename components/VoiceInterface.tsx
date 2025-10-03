@@ -13,6 +13,25 @@ interface VoiceInterfaceProps {
 
 export type VoiceState = 'idle' | 'listening' | 'thinking' | 'speaking' | 'error';
 
+const detectLowSpecDevice = () => {
+  if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+    return false;
+  }
+
+  const cores = typeof navigator.hardwareConcurrency === 'number' ? navigator.hardwareConcurrency : undefined;
+  const lowCpu = typeof cores === 'number' && cores <= 6;
+
+  const navWithMemory = navigator as Navigator & { deviceMemory?: number };
+  const deviceMemory = navWithMemory.deviceMemory;
+  const lowMemory = typeof deviceMemory === 'number' && deviceMemory <= 4;
+
+  const hasCoarsePointer = typeof window.matchMedia === 'function' && window.matchMedia('(any-pointer: coarse)').matches;
+  const prefersReducedMotion = typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const smallViewport = window.innerWidth <= 900;
+
+  return lowCpu || lowMemory || hasCoarsePointer || prefersReducedMotion || smallViewport;
+};
+
 const sanitizeResponseChunk = (raw: string) =>
   raw
     .replace(/\[\[(?:img|icon):[^\]]+\]\]/gi, '')
@@ -58,12 +77,7 @@ const resolveStreamingErrorMessage = (error: unknown) => {
 const VoiceInterface: React.FC<VoiceInterfaceProps> = ({ onExit, chat }) => {
   const [voiceState, setVoiceState] = useState<VoiceState>('idle');
   const [errorMessage, setErrorMessage] = useState('');
-  const [isLowSpecDevice] = useState(() => {
-    if (typeof navigator === 'undefined' || typeof navigator.hardwareConcurrency !== 'number') {
-      return false;
-    }
-    return navigator.hardwareConcurrency <= 4;
-  });
+  const [isLowSpecDevice, setIsLowSpecDevice] = useState(() => detectLowSpecDevice());
 
   const {
     isListening,
@@ -77,6 +91,12 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({ onExit, chat }) => {
     speechRecognitionWarning,
   } = useVoiceProcessor();
   const activeSpeechStreamRef = useRef<ReturnType<typeof createSpeechStream> | null>(null);
+
+  useEffect(() => {
+    if (!isLowSpecDevice && detectLowSpecDevice()) {
+      setIsLowSpecDevice(true);
+    }
+  }, [isLowSpecDevice]);
 
   const handleSendMessage = useCallback(async (messageText: string) => {
     if (!chat) {
