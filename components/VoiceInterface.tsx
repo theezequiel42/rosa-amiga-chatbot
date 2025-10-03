@@ -197,17 +197,20 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({ onExit, chat }) => {
 
   return (
     <div className="w-full h-full flex flex-col items-center justify-center bg-gray-900/80 backdrop-blur-sm absolute inset-0 animate-fade-in-up animation-delay-0">
-      <button
-        onClick={onExit}
-        className="absolute top-4 right-4 p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-white"
-        aria-label="Voltar para o bate-papo de texto"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
+      <div className="absolute inset-x-0 top-0 flex justify-end pl-[calc(env(safe-area-inset-left,0)+1rem)] pr-[calc(env(safe-area-inset-right,0)+1rem)] pt-[calc(env(safe-area-inset-top,0)+1rem)] pointer-events-none">
+        <button
+          onClick={onExit}
+          className="pointer-events-auto p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-white"
+          aria-label="Voltar para o bate-papo de texto"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
 
-      <div className={`w-full h-3/5 max-w-3xl ${speechRecognitionAvailable ? '' : 'pointer-events-none opacity-60'}`}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div className={`w-full h-3/5 max-w-full sm:max-w-3xl ${speechRecognitionAvailable ? '' : 'pointer-events-none opacity-60'}`}>
         <AudioVisualizer
           frequencyData={frequencyData}
           interactionState={voiceState}
@@ -215,7 +218,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({ onExit, chat }) => {
         />
       </div>
 
-      <div className="text-center p-4 h-1/5 flex flex-col justify-center items-center space-y-3">
+      <div className="text-center px-4 pt-[calc(env(safe-area-inset-top,0)+1rem)] sm:pt-6 pb-[calc(env(safe-area-inset-bottom,0)+1.5rem)] h-1/5 flex flex-col justify-center items-center space-y-3">
         <p className="text-white text-lg font-semibold min-h-[32px]">
           {statusText}
         </p>
