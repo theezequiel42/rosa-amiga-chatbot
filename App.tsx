@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import ChatInterface from './components/ChatInterface';
 import { RiFlowerFill } from 'react-icons/ri';
 
@@ -19,8 +19,8 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto h-[95vh] bg-white rounded-2xl shadow-xl flex flex-col">
-      <header className="bg-gradient-to-r from-pink-600 to-purple-500 text-white p-4 rounded-t-2xl flex-shrink-0 flex items-center space-x-4">
+    <div className="w-full sm:max-w-3xl mx-auto min-h-[100svh] bg-white rounded-2xl max-[359px]:rounded-none shadow-xl flex flex-col">
+      <header className="bg-gradient-to-r from-pink-600 to-purple-500 text-white p-4 rounded-t-2xl max-[359px]:rounded-none flex-shrink-0 flex items-center space-x-4">
         <div className="w-12 h-12 bg-white/30 rounded-full flex items-center justify-center">
           <RiFlowerFill className="h-7 w-7 text-white" aria-hidden="true" />
         </div>

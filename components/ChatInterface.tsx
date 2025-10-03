@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+﻿import React, { useState, useEffect, useRef, useCallback } from 'react';
 import type { Chat } from '@google/genai';
 import { ChatMessage, Sender } from '../types';
 import { createChatSession, streamMessageToBot } from '../services/geminiService';
@@ -261,11 +261,11 @@ const ChatInterface: React.FC = () => {
         </div>
       </div>
       <div className="p-4 bg-white border-t border-gray-200">
-        <form onSubmit={handleFormSubmit} className="flex">
+        <form onSubmit={handleFormSubmit} className="flex w-full">
           <label htmlFor="chat-input" className="sr-only">
             Digite sua mensagem
           </label>
-          <div className={`flex items-center flex-grow border border-gray-300 rounded-full transition-shadow px-2 py-1 focus-within:ring-2 focus-within:ring-pink-500 ${inputDisabled ? 'bg-gray-100' : 'bg-white'}`}>
+          <div className={`flex items-center flex-grow border border-gray-300 rounded-full transition-shadow px-2 py-1 focus-within:ring-2 focus-within:ring-pink-500 max-[360px]:px-1.5 max-[360px]:py-0.5 max-[330px]:px-1 ${inputDisabled ? 'bg-gray-100' : 'bg-white'}`}>
             <input
               id="chat-input"
               type="text"
@@ -273,7 +273,7 @@ const ChatInterface: React.FC = () => {
               onChange={(e) => setInput(e.target.value)}
               placeholder="Digite sua mensagem..."
               disabled={inputDisabled}
-              className="flex-grow px-3 py-2 bg-transparent border-none focus:outline-none focus:ring-0 text-sm sm:text-base disabled:cursor-not-allowed"
+              className="flex-grow px-3 py-2 bg-transparent border-none focus:outline-none focus:ring-0 text-sm sm:text-base disabled:cursor-not-allowed max-[360px]:px-2.5 max-[360px]:py-1.5 max-[360px]:text-[13px] max-[330px]:px-2 max-[330px]:py-1.5 max-[330px]:text-xs"
               autoComplete="off"
             />
             {isVoiceSupported && (
@@ -281,7 +281,7 @@ const ChatInterface: React.FC = () => {
                 type="button"
                 onClick={() => setMode('voice')}
                 disabled={isLoading}
-                className="text-gray-500 font-semibold w-10 h-10 max-[408px]:w-9 max-[408px]:h-9 rounded-full hover:bg-gray-100 disabled:text-gray-300 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 flex items-center justify-center flex-shrink-0 ml-1"
+                className="text-gray-500 font-semibold w-10 h-10 max-[408px]:w-9 max-[408px]:h-9 max-[360px]:w-8 max-[360px]:h-8 max-[330px]:w-7 max-[330px]:h-7 rounded-full hover:bg-gray-100 disabled:text-gray-300 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 flex items-center justify-center flex-shrink-0 ml-1 max-[360px]:ml-0.5"
                 aria-label="Ativar bate-papo por voz"
               >
                 <GiSoundWaves className="h-5 w-5 max-[408px]:h-4 max-[408px]:w-4" aria-hidden="true" focusable="false" />
@@ -290,7 +290,7 @@ const ChatInterface: React.FC = () => {
             <button
               type="submit"
               disabled={inputDisabled || !input.trim()}
-              className="bg-pink-600 text-white font-semibold w-10 h-10 max-[408px]:w-9 max-[408px]:h-9 rounded-full hover:bg-pink-700 disabled:bg-pink-300 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 flex items-center justify-center flex-shrink-0 ml-1"
+              className="bg-pink-600 text-white font-semibold w-10 h-10 max-[408px]:w-9 max-[408px]:h-9 max-[360px]:w-8 max-[360px]:h-8 max-[330px]:w-7 max-[330px]:h-7 rounded-full hover:bg-pink-700 disabled:bg-pink-300 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 flex items-center justify-center flex-shrink-0 ml-1 max-[360px]:ml-0.5"
               aria-label="Enviar mensagem"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 max-[408px]:h-4 max-[408px]:w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" focusable="false">
