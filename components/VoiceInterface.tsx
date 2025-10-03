@@ -1,8 +1,10 @@
-import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback, lazy, Suspense } from 'react';
 import type { Chat } from '@google/genai';
 import { useVoiceProcessor } from '../hooks/useVoiceProcessor';
-import AudioVisualizer from './AudioVisualizer';
+import LowSpecVisualizer from './AudioVisualizerLowSpec';
 import { streamMessageToBot } from '../services/geminiService';
+
+const AudioVisualizer = lazy(() => import('./AudioVisualizer'));
 
 interface VoiceInterfaceProps {
   onExit: () => void;
@@ -56,6 +58,13 @@ const resolveStreamingErrorMessage = (error: unknown) => {
 const VoiceInterface: React.FC<VoiceInterfaceProps> = ({ onExit, chat }) => {
   const [voiceState, setVoiceState] = useState<VoiceState>('idle');
   const [errorMessage, setErrorMessage] = useState('');
+  const [isLowSpecDevice] = useState(() => {
+    if (typeof navigator === 'undefined' || typeof navigator.hardwareConcurrency !== 'number') {
+      return false;
+    }
+    return navigator.hardwareConcurrency <= 4;
+  });
+
   const {
     isListening,
     transcript,
@@ -211,11 +220,29 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({ onExit, chat }) => {
       </div>
 
       <div className={`w-full h-3/5 max-w-full sm:max-w-3xl ${speechRecognitionAvailable ? '' : 'pointer-events-none opacity-60'}`}>
-        <AudioVisualizer
-          frequencyData={frequencyData}
-          interactionState={voiceState}
-          onClick={handleVisualizerClick}
-        />
+        {isLowSpecDevice ? (
+          <LowSpecVisualizer
+            frequencyData={frequencyData}
+            interactionState={voiceState}
+            onClick={handleVisualizerClick}
+          />
+        ) : (
+          <Suspense
+            fallback={(
+              <LowSpecVisualizer
+                frequencyData={frequencyData}
+                interactionState={voiceState}
+                onClick={handleVisualizerClick}
+              />
+            )}
+          >
+            <AudioVisualizer
+              frequencyData={frequencyData}
+              interactionState={voiceState}
+              onClick={handleVisualizerClick}
+            />
+          </Suspense>
+        )}
       </div>
 
       <div className="text-center px-4 pt-[calc(env(safe-area-inset-top,0)+1rem)] sm:pt-6 pb-[calc(env(safe-area-inset-bottom,0)+1.5rem)] h-1/5 flex flex-col justify-center items-center space-y-3">

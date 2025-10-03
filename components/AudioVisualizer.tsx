@@ -1,7 +1,8 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import type { VoiceState } from './VoiceInterface';
+import LowSpecVisualizer, { computeFrequencyValue } from './AudioVisualizerLowSpec';
 
 const vertexShader = `
   precision mediump float;
@@ -120,6 +121,18 @@ const fragmentShader = `
   }
 `;
 
+const resolveStateFloat = (state: VoiceState) => {
+  switch (state) {
+    case 'listening':
+      return 1.0;
+    case 'thinking':
+      return 2.0;
+    case 'speaking':
+      return 3.0;
+    default:
+      return 0.0;
+  }
+};
 
 interface AudioVisualizerProps {
   frequencyData: Uint8Array;
@@ -135,142 +148,227 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({ frequencyData, intera
   const meshRef = useRef<THREE.Mesh | null>(null);
   const controlsRef = useRef<OrbitControls | null>(null);
   const isInitializedRef = useRef(false);
-
-  // Use a ref to pass the latest props to the animation loop without re-triggering the setup effect
   const latestPropsRef = useRef({ frequencyData, interactionState });
+
+  const [useFallback, setUseFallback] = useState(() => {
+    if (typeof navigator === 'undefined' || typeof navigator.hardwareConcurrency !== 'number') {
+      return false;
+    }
+    return navigator.hardwareConcurrency <= 4;
+  });
+
   useEffect(() => {
     latestPropsRef.current = { frequencyData, interactionState };
   }, [frequencyData, interactionState]);
 
   useEffect(() => {
-    if (!mountRef.current) return;
+    if (!useFallback && typeof navigator !== 'undefined' && typeof navigator.hardwareConcurrency === 'number' && navigator.hardwareConcurrency <= 4) {
+      setUseFallback(true);
+    }
+  }, [useFallback]);
+
+  useEffect(() => {
+    if (useFallback) {
+      return;
+    }
 
     const currentMount = mountRef.current;
-    let animationFrameId: number;
+    if (!currentMount) {
+      return;
+    }
 
-    const init = (width: number, height: number) => {
-      // Scene
-      const scene = new THREE.Scene();
-      sceneRef.current = scene;
-      
-      // Camera
-      const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
-      camera.position.z = 3;
-      cameraRef.current = camera;
+    let animationFrameId: number | null = null;
 
-      // Renderer
-      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-      renderer.setSize(width, height);
-      renderer.setPixelRatio(window.devicePixelRatio);
-      currentMount.appendChild(renderer.domElement);
-      rendererRef.current = renderer;
-
-      // Geometry & Material
-      const geometry = new THREE.IcosahedronGeometry(1.5, 64);
-      const material = new THREE.ShaderMaterial({
-        vertexShader,
-        fragmentShader,
-        uniforms: {
-          u_time: { value: 0 },
-          u_frequency: { value: 0 },
-          u_state_float: { value: 0 },
-        },
-      });
-      const mesh = new THREE.Mesh(geometry, material);
-      scene.add(mesh);
-      meshRef.current = mesh;
-      
-      // Controls
-      const controls = new OrbitControls(camera, renderer.domElement);
-      controls.enableDamping = true;
-      controls.enablePan = false;
-      controls.enableZoom = false;
-      controlsRef.current = controls;
-
-      // Animation loop
-      const animate = (time: number) => {
-        const timeSeconds = time * 0.001;
-        const { interactionState: currentState, frequencyData: currentFreqData } = latestPropsRef.current;
-        
-        if (material) {
-            // 1. Update frequency for distortion
-            let frequencyValue = 0;
-            if (currentState === 'listening' && currentFreqData.length > 0) {
-                // Use real microphone data when listening
-                frequencyValue = currentFreqData.reduce((a, b) => a + b) / currentFreqData.length / 128;
-            } else if (currentState === 'speaking') {
-                // Generate a simulated, organic-looking frequency when the bot is speaking
-                const slowPulse = (Math.sin(timeSeconds * 4) * 0.5 + 0.5) * 0.6;
-                const fastJitter = (Math.sin(timeSeconds * 18) * 0.5 + 0.5) * 0.4;
-                frequencyValue = ((slowPulse + fastJitter) / 2) * 0.4;
-            }
-            
-            // 2. Update state for color and other time-based effects in the shader
-            let stateFloat = 0;
-            switch(currentState) {
-                case 'listening': stateFloat = 1.0; break;
-                case 'thinking': stateFloat = 2.0; break;
-                case 'speaking': stateFloat = 3.0; break;
-                default: stateFloat = 0.0; // idle or error
-            }
-
-            // Apply updates to material uniforms
-            material.uniforms.u_time.value = timeSeconds;
-            // Smoothly interpolate values for softer visual transitions
-            material.uniforms.u_frequency.value = THREE.MathUtils.lerp(material.uniforms.u_frequency.value, frequencyValue, 0.1);
-            material.uniforms.u_state_float.value = THREE.MathUtils.lerp(material.uniforms.u_state_float.value, stateFloat, 0.1);
-        }
-
-        controls.update();
-        renderer.render(scene, camera);
-        animationFrameId = requestAnimationFrame(animate);
-      };
-      animate(0);
-    };
-    
-    const resizeObserver = new ResizeObserver(entries => {
-        const entry = entries[0];
-        if (entry) {
-            const { width, height } = entry.contentRect;
-            if (!isInitializedRef.current && width > 0 && height > 0) {
-                init(width, height);
-                isInitializedRef.current = true;
-            } else if (isInitializedRef.current) {
-                // Handle resize for already initialized scene
-                if (rendererRef.current && cameraRef.current) {
-                    rendererRef.current.setSize(width, height);
-                    cameraRef.current.aspect = width / height;
-                    cameraRef.current.updateProjectionMatrix();
-                }
-            }
-        }
-    });
-
-    resizeObserver.observe(currentMount);
-
-    // Cleanup
-    return () => {
-      resizeObserver.unobserve(currentMount);
-      cancelAnimationFrame(animationFrameId);
-      if (rendererRef.current) {
-        currentMount.removeChild(rendererRef.current.domElement);
+    const disposeScene = () => {
+      if (animationFrameId !== null) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
       }
-      // Dispose Three.js objects
+      if (rendererRef.current) {
+        const dom = rendererRef.current.domElement;
+        if (dom.parentElement === currentMount) {
+          currentMount.removeChild(dom);
+        }
+        rendererRef.current.dispose();
+        rendererRef.current = null;
+      }
       if (meshRef.current) {
         meshRef.current.geometry.dispose();
-        if (Array.isArray(meshRef.current.material)) {
-            meshRef.current.material.forEach(m => m.dispose());
+        const material = meshRef.current.material;
+        if (Array.isArray(material)) {
+          material.forEach(mat => mat.dispose());
         } else {
-            meshRef.current.material.dispose();
+          material.dispose();
         }
+        meshRef.current = null;
       }
-      rendererRef.current?.dispose();
       controlsRef.current?.dispose();
+      controlsRef.current = null;
+      sceneRef.current = null;
+      cameraRef.current = null;
       isInitializedRef.current = false;
     };
-  }, []);
 
-  return <div ref={mountRef} onClick={onClick} className="w-full h-full cursor-pointer" aria-label="Visualizador de áudio interativo" role="button" tabIndex={0} />;
+    const init = (width: number, height: number): boolean => {
+      try {
+        const scene = new THREE.Scene();
+        sceneRef.current = scene;
+
+        const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+        camera.position.z = 3;
+        cameraRef.current = camera;
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        const devicePixelRatio = typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1;
+        renderer.setSize(width, height);
+        renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+        renderer.domElement.style.touchAction = 'none';
+        renderer.domElement.style.width = '100%';
+        renderer.domElement.style.height = '100%';
+        currentMount.appendChild(renderer.domElement);
+        rendererRef.current = renderer;
+
+        const gl = renderer.getContext();
+        const hasWebGLContext = (typeof WebGL2RenderingContext !== 'undefined' && gl instanceof WebGL2RenderingContext) ||
+          (typeof WebGLRenderingContext !== 'undefined' && gl instanceof WebGLRenderingContext);
+        if (!hasWebGLContext) {
+          throw new Error('WebGL not supported on this device');
+        }
+
+        const detailLevel = typeof window !== 'undefined' && window.innerWidth < 768 ? 4 : 5;
+        const geometry = new THREE.IcosahedronGeometry(1.5, detailLevel);
+        const material = new THREE.ShaderMaterial({
+          vertexShader,
+          fragmentShader,
+          uniforms: {
+            u_time: { value: 0 },
+            u_frequency: { value: 0 },
+            u_state_float: { value: 0 },
+          },
+          transparent: true,
+        });
+
+        const mesh = new THREE.Mesh(geometry, material);
+        scene.add(mesh);
+        meshRef.current = mesh;
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.08;
+        controls.enablePan = false;
+        controls.enableZoom = false;
+        controls.rotateSpeed = 0.4;
+        controlsRef.current = controls;
+
+        const animate = (time: number) => {
+          const timeSeconds = time * 0.001;
+          const { interactionState: currentState, frequencyData: currentFrequencyData } = latestPropsRef.current;
+          const currentMesh = meshRef.current;
+          const materialRef = currentMesh?.material as THREE.ShaderMaterial | undefined;
+
+          if (materialRef) {
+            const targetFrequency = computeFrequencyValue(currentState, currentFrequencyData, timeSeconds);
+            const targetStateFloat = resolveStateFloat(currentState);
+            materialRef.uniforms.u_time.value = timeSeconds;
+            materialRef.uniforms.u_frequency.value = THREE.MathUtils.lerp(materialRef.uniforms.u_frequency.value, targetFrequency, 0.1);
+            materialRef.uniforms.u_state_float.value = THREE.MathUtils.lerp(materialRef.uniforms.u_state_float.value, targetStateFloat, 0.1);
+          }
+
+          controlsRef.current?.update();
+
+          const activeRenderer = rendererRef.current;
+          const activeScene = sceneRef.current;
+          const activeCamera = cameraRef.current;
+          if (activeRenderer && activeScene && activeCamera) {
+            activeRenderer.render(activeScene, activeCamera);
+          }
+
+          animationFrameId = requestAnimationFrame(animate);
+        };
+
+        animationFrameId = requestAnimationFrame(animate);
+        return true;
+      } catch (error) {
+        console.warn('3D audio visualizer failed to initialise:', error);
+        disposeScene();
+        return false;
+      }
+    };
+
+    const handleResize = (width: number, height: number) => {
+      if (width <= 0 || height <= 0) {
+        return;
+      }
+
+      if (!isInitializedRef.current) {
+        const initialized = init(width, height);
+        if (initialized) {
+          isInitializedRef.current = true;
+        } else {
+          setUseFallback(true);
+        }
+      } else if (rendererRef.current && cameraRef.current) {
+        rendererRef.current.setSize(width, height);
+        cameraRef.current.aspect = width / height;
+        cameraRef.current.updateProjectionMatrix();
+      }
+    };
+
+    const updateFromElement = () => {
+      const rect = currentMount.getBoundingClientRect();
+      handleResize(rect.width, rect.height);
+    };
+
+    let resizeObserver: ResizeObserver | null = null;
+    let detachListeners: (() => void) | null = null;
+
+    if (typeof ResizeObserver !== 'undefined') {
+      resizeObserver = new ResizeObserver(entries => {
+        const entry = entries[0];
+        const width = entry?.contentRect?.width ?? currentMount.clientWidth;
+        const height = entry?.contentRect?.height ?? currentMount.clientHeight;
+        handleResize(width, height);
+      });
+      resizeObserver.observe(currentMount);
+      updateFromElement();
+    } else {
+      const listener = () => window.requestAnimationFrame(updateFromElement);
+      window.addEventListener('resize', listener);
+      window.addEventListener('orientationchange', listener);
+      detachListeners = () => {
+        window.removeEventListener('resize', listener);
+        window.removeEventListener('orientationchange', listener);
+      };
+      updateFromElement();
+    }
+
+    return () => {
+      resizeObserver?.disconnect();
+      detachListeners?.();
+      disposeScene();
+    };
+  }, [useFallback]);
+
+  if (useFallback) {
+    return (
+      <LowSpecVisualizer
+        frequencyData={frequencyData}
+        interactionState={interactionState}
+        onClick={onClick}
+      />
+    );
+  }
+
+  return (
+    <div
+      ref={mountRef}
+      onClick={onClick}
+      className="w-full h-full cursor-pointer"
+      aria-label="Visualizador de audio interativo"
+      role="button"
+      tabIndex={0}
+    />
+  );
 };
 
 export default AudioVisualizer;
